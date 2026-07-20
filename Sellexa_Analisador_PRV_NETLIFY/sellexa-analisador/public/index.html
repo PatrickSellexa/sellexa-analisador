@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Analisador de Abordagem Comercial — Sellexa</title>
+<style>
+  :root {
+    --navy:#0B0D18;--navy2:#111420;--card:#161926;--border:#252840;
+    --blue1:#5AC8FA;--blue2:#2E7EEA;--blue3:#1240B0;--blue4:#0D1E6E;
+    --white:#FFFFFF;--gray1:#E0E4F0;--gray2:#8899BB;--gray3:#445577;
+    --green:#22C78A;--yellow:#F5A623;--red:#E05050;
+    --radius:10px;--font:'Inter','Segoe UI',Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--navy);color:var(--white);font-family:var(--font);min-height:100vh;line-height:1.6}
+  .topbar{height:4px;background:linear-gradient(90deg,var(--blue1),var(--blue2),var(--blue3))}
+  header{padding:1.25rem 2rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--navy)}
+  .logo{display:flex;align-items:center;gap:12px}
+  .logo-s{width:36px;height:36px;position:relative;flex-shrink:0}
+  .logo-s span{position:absolute;left:0;right:0;height:9px;border-radius:4px}
+  .s1{top:0;background:linear-gradient(90deg,#5AC8FA,#2E7EEA)}
+  .s2{top:13px;background:linear-gradient(90deg,#2E7EEA,#1A5FD4)}
+  .s3{top:26px;background:linear-gradient(90deg,#1A5FD4,#1240B0)}
+  .logo-name{font-size:20px;font-weight:700;letter-spacing:.5px;color:var(--white)}
+  .logo-name span{color:var(--blue1)}
+  .header-tag{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--blue2);background:rgba(46,126,234,.12);border:1px solid rgba(46,126,234,.25);padding:4px 12px;border-radius:99px}
+  main{max-width:780px;margin:0 auto;padding:3rem 1.5rem 4rem}
+  .hero{text-align:center;margin-bottom:2.5rem}
+  .hero-eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--blue1);margin-bottom:14px}
+  .hero h1{font-size:clamp(24px,4vw,36px);font-weight:800;color:var(--white);line-height:1.2;margin-bottom:14px}
+  .hero h1 em{font-style:normal;color:var(--blue1)}
+  .hero-sub{font-size:15px;color:var(--gray2);max-width:520px;margin:0 auto 1.5rem}
+  .pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:.5rem}
+  .pill{font-size:11px;font-weight:600;padding:4px 12px;border-radius:99px;border:1px solid var(--border);color:var(--gray2);letter-spacing:.04em}
+  .form-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;margin-bottom:1.5rem}
+  .field-label{display:block;font-size:12px;font-weight:600;color:var(--gray1);margin-bottom:8px;letter-spacing:.04em;text-transform:uppercase}
+  .input-tabs{display:flex;gap:6px;margin-bottom:1.25rem}
+  .tab-btn{flex:1;padding:.6rem .5rem;background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius);color:var(--gray2);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;text-align:center;letter-spacing:.03em}
+  .tab-btn:hover{border-color:var(--blue2);color:var(--white)}
+  .tab-btn.active{background:rgba(46,126,234,.15);border-color:var(--blue2);color:var(--blue1)}
+  .tab-icon{display:block;font-size:20px;margin-bottom:4px}
+  .input-panel{display:none}
+  .input-panel.active{display:block}
+  textarea{width:100%;min-height:180px;background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius);color:var(--white);font-family:var(--font);font-size:14px;line-height:1.7;padding:1rem;resize:vertical;transition:border-color .2s}
+  textarea:focus{outline:none;border-color:var(--blue2)}
+  textarea::placeholder{color:var(--gray3)}
+  .upload-area{border:2px dashed var(--border);border-radius:var(--radius);padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:.2s;background:var(--navy2);position:relative}
+  .upload-area:hover,.upload-area.dragover{border-color:var(--blue2);background:rgba(46,126,234,.05)}
+  .upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .upload-icon{font-size:36px;margin-bottom:12px;display:block}
+  .upload-title{font-size:15px;font-weight:600;color:var(--white);margin-bottom:6px}
+  .upload-sub{font-size:13px;color:var(--gray2)}
+  .upload-formats{font-size:11px;color:var(--gray3);margin-top:8px}
+  .file-preview{display:none;background:rgba(34,199,138,.08);border:1px solid rgba(34,199,138,.25);border-radius:var(--radius);padding:1rem;margin-top:.75rem;align-items:center;gap:12px}
+  .file-preview.show{display:flex}
+  .file-preview-icon{font-size:24px;flex-shrink:0}
+  .file-preview-info{flex:1;min-width:0}
+  .file-preview-name{font-size:13px;font-weight:600;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .file-preview-size{font-size:11px;color:var(--gray2)}
+  .file-remove{background:none;border:none;color:var(--gray3);cursor:pointer;font-size:18px;padding:0;flex-shrink:0}
+  .file-remove:hover{color:var(--red)}
+  .processing-info{display:none;background:rgba(46,126,234,.08);border:1px solid rgba(46,126,234,.2);border-radius:var(--radius);padding:.75rem 1rem;margin-top:.75rem;font-size:12px;color:var(--blue1)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:1.25rem 0}
+  @media(max-width:560px){.row2{grid-template-columns:1fr}}
+  select,input[type=text]{width:100%;background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius);color:var(--white);font-family:var(--font);font-size:14px;padding:.65rem .9rem;transition:border-color .2s;appearance:none;-webkit-appearance:none}
+  select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238899BB' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+  select:focus,input[type=text]:focus{outline:none;border-color:var(--blue2)}
+  select option{background:var(--navy2)}
+  .btn-analisar{width:100%;padding:1rem;background:linear-gradient(90deg,var(--blue2),var(--blue3));border:none;border-radius:var(--radius);color:var(--white);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;margin-top:1.25rem}
+  .btn-analisar:hover{opacity:.9}
+  .btn-analisar:disabled{opacity:.45;cursor:not-allowed}
+  #loading{display:none;text-align:center;padding:3rem 1rem}
+  .loader{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--blue1);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 1rem}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #loading p{color:var(--gray2);font-size:14px}
+  #loading .load-step{font-size:12px;color:var(--gray3);margin-top:6px}
+  #results{display:none}
+  .score-hero{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;display:flex;gap:2rem;align-items:center;margin-bottom:1.25rem}
+  @media(max-width:480px){.score-hero{flex-direction:column;text-align:center}}
+  .score-ring{width:108px;height:108px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;border:3px solid}
+  .score-ring .num{font-size:38px;font-weight:800;line-height:1}
+  .score-ring .den{font-size:12px;font-weight:500;opacity:.7;margin-top:2px}
+  .score-meta h2{font-size:22px;font-weight:700;color:var(--white);margin-bottom:8px}
+  .score-meta p{font-size:14px;color:var(--gray2);line-height:1.6}
+  .pillars-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.25rem}
+  @media(max-width:560px){.pillars-grid{grid-template-columns:repeat(3,1fr)}}
+  .pillar-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem .75rem;text-align:center}
+  .pillar-name{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--gray2);margin-bottom:8px;text-transform:uppercase}
+  .pillar-bar{height:5px;background:var(--border);border-radius:3px;margin-bottom:8px;overflow:hidden}
+  .pillar-bar-fill{height:100%;border-radius:3px;transition:width .8s ease}
+  .pillar-score{font-size:22px;font-weight:800}
+  .diag-block{background:rgba(46,126,234,.08);border:1px solid rgba(46,126,234,.25);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;gap:12px;align-items:flex-start}
+  .diag-icon{font-size:22px;flex-shrink:0;margin-top:1px}
+  .diag-text{font-size:14px;color:var(--gray1);font-style:italic;line-height:1.6}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+  @media(max-width:560px){.two-col{grid-template-columns:1fr}}
+  .section-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem}
+  .section-card h3{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem}
+  .strong-list,.ajuste-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .strong-list li{display:flex;gap:10px;font-size:13px;color:var(--gray1);line-height:1.5}
+  .strong-list li::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0}
+  .ajuste-item{border-left:3px solid var(--yellow);padding-left:12px}
+  .ajuste-problema{font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+  .ajuste-solucao{font-size:13px;color:var(--gray1);line-height:1.5}
+  .rewrite-block{background:var(--card);border:1px solid rgba(90,200,250,.3);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.25rem}
+  .rewrite-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue1);margin-bottom:10px}
+  .rewrite-text{font-size:14px;color:var(--gray1);font-style:italic;line-height:1.7}
+  .transcricao-block{background:rgba(90,200,250,.05);border:1px solid rgba(90,200,250,.15);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.25rem}
+  .transcricao-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue1);margin-bottom:8px}
+  .transcricao-text{font-size:12px;color:var(--gray2);line-height:1.6;max-height:120px;overflow-y:auto}
+  .cta-block{background:linear-gradient(135deg,var(--blue4),var(--navy2));border:1px solid rgba(46,126,234,.3);border-radius:14px;padding:2rem;text-align:center;margin-top:1.5rem}
+  .cta-block h3{font-size:18px;font-weight:700;color:var(--white);margin-bottom:8px}
+  .cta-block p{font-size:13px;color:var(--gray2);margin-bottom:1.25rem;line-height:1.6}
+  .btn-cta{display:inline-block;padding:.8rem 2rem;background:linear-gradient(90deg,var(--blue2),var(--blue3));border-radius:var(--radius);color:var(--white);font-weight:700;font-size:14px;text-decoration:none}
+  .btn-novo{width:100%;padding:.85rem;background:transparent;border:1px solid var(--border);border-radius:var(--radius);color:var(--gray2);font-family:var(--font);font-size:14px;cursor:pointer;transition:.2s;margin-top:.75rem}
+  .btn-novo:hover{border-color:var(--blue2);color:var(--white)}
+  footer{border-top:1px solid var(--border);padding:1.25rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  footer p{font-size:12px;color:var(--gray3)}
+  footer a{color:var(--blue2);text-decoration:none;font-size:12px}
+</style>
+</head>
+<body>
+<div class="topbar"></div>
+<header>
+  <div class="logo">
+    <div class="logo-s"><span class="s1"></span><span class="s2"></span><span class="s3"></span></div>
+    <div class="logo-name">SELL<span>E</span>XA</div>
+  </div>
+  <div class="header-tag">Método PRV</div>
+</header>
+<main>
+  <div class="hero">
+    <div class="hero-eyebrow">Ferramenta gratuita · Sellexa</div>
+    <h1>Sua abordagem de vendas<br/>tem <em>nota suficiente</em> para fechar?</h1>
+    <p class="hero-sub">Envie seu script, áudio, print de WhatsApp ou e-mail e receba uma análise completa baseada no Método PRV, SPIN Selling, AIDA, BANT e Rapport.</p>
+    <div class="pills">
+      <span class="pill">Método PRV</span>
+      <span class="pill">SPIN Selling</span>
+      <span class="pill">AIDA</span>
+      <span class="pill">BANT</span>
+      <span class="pill">Rapport</span>
+    </div>
+  </div>
+
+  <div id="form-area">
+    <div class="form-card">
+      <label class="field-label">Como você quer enviar sua abordagem?</label>
+      <div class="input-tabs">
+        <button class="tab-btn active" onclick="switchTab('texto')" id="tab-texto">
+          <span class="tab-icon">📝</span>Texto / Script
+        </button>
+        <button class="tab-btn" onclick="switchTab('audio')" id="tab-audio">
+          <span class="tab-icon">🎙️</span>Áudio da ligação
+        </button>
+        <button class="tab-btn" onclick="switchTab('imagem')" id="tab-imagem">
+          <span class="tab-icon">📸</span>Print / Imagem
+        </button>
+      </div>
+
+      <div class="input-panel active" id="panel-texto">
+        <textarea id="abordagem" placeholder="Cole aqui sua abordagem — script de ligação, mensagem de WhatsApp, e-mail, pitch, follow-up..."></textarea>
+      </div>
+
+      <div class="input-panel" id="panel-audio">
+        <div class="upload-area" id="upload-audio-area">
+          <input type="file" id="file-audio" accept="audio/*,.mp3,.wav,.m4a,.ogg,.aac" onchange="handleFile('audio',this)"/>
+          <span class="upload-icon">🎙️</span>
+          <div class="upload-title">Envie o áudio da sua abordagem</div>
+          <div class="upload-sub">Arraste ou clique para selecionar</div>
+          <div class="upload-formats">MP3 · WAV · M4A · OGG · AAC · até 25MB</div>
+        </div>
+        <div class="file-preview" id="preview-audio">
+          <span class="file-preview-icon">🎵</span>
+          <div class="file-preview-info">
+            <div class="file-preview-name" id="audio-name"></div>
+            <div class="file-preview-size" id="audio-size"></div>
+          </div>
+          <button class="file-remove" onclick="removeFile('audio')">✕</button>
+        </div>
+        <div class="processing-info" id="info-audio">🔊 O áudio será transcrito automaticamente antes da análise</div>
+      </div>
+
+      <div class="input-panel" id="panel-imagem">
+        <div class="upload-area" id="upload-imagem-area">
+          <input type="file" id="file-imagem" accept="image/*,.jpg,.jpeg,.png,.webp" onchange="handleFile('imagem',this)"/>
+          <span class="upload-icon">📸</span>
+          <div class="upload-title">Envie o print da sua abordagem</div>
+          <div class="upload-sub">Print de WhatsApp, e-mail, LinkedIn ou qualquer conversa</div>
+          <div class="upload-formats">JPG · PNG · WEBP · até 10MB</div>
+        </div>
+        <div class="file-preview" id="preview-imagem">
+          <span class="file-preview-icon">🖼️</span>
+          <div class="file-preview-info">
+            <div class="file-preview-name" id="imagem-name"></div>
+            <div class="file-preview-size" id="imagem-size"></div>
+          </div>
+          <button class="file-remove" onclick="removeFile('imagem')">✕</button>
+        </div>
+        <div class="processing-info" id="info-imagem">👁️ O texto será lido automaticamente da imagem antes da análise</div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label class="field-label" for="tipo">Tipo de abordagem</label>
+          <select id="tipo">
+            <option value="ligacao">Ligação fria (cold call)</option>
+            <option value="whatsapp">Mensagem de WhatsApp</option>
+            <option value="email">E-mail de prospecção</option>
+            <option value="pitch">Pitch de reunião</option>
+            <option value="followup">Follow-up</option>
+            <option value="fechamento">Técnica de fechamento</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="segmento">Segmento do cliente</label>
+          <input type="text" id="segmento" placeholder="Ex: imobiliário, B2B SaaS, varejo..."/>
+        </div>
+      </div>
+      <button class="btn-analisar" id="btn-analisar" onclick="analisar()">Analisar minha abordagem →</button>
+    </div>
+  </div>
+
+  <div id="loading">
+    <div class="loader"></div>
+    <p>Analisando com o Método PRV...</p>
+    <div class="load-step" id="load-step">Preparando análise...</div>
+  </div>
+
+  <div id="results"></div>
+</main>
+<footer>
+  <p>© 2026 Grupo Sellexa — Todos os direitos reservados</p>
+  <a href="https://gruposellexa.com" target="_blank">gruposellexa.com</a>
+</footer>
+
+<script>
+const PROXY = '/api/analisar';
+const SYSTEM = `Você é um especialista em vendas B2B da Sellexa, empresa de previsibilidade comercial com o Método PRV (Processo, Rotina, Volume). Analise a abordagem comercial e retorne APENAS um JSON válido sem markdown.
+
+Avalie usando: Método PRV, SPIN Selling, AIDA, BANT e Rapport.
+
+Retorne exatamente:
+{"nota_geral":<0-100>,"classificacao":"<Iniciante|Em desenvolvimento|Competente|Avançado|PRV Master>","resumo_executivo":"<2-3 frases>","pilares":{"PRV":{"nota":<0-100>,"resumo":"<1 frase>"},"SPIN":{"nota":<0-100>,"resumo":"<1 frase>"},"AIDA":{"nota":<0-100>,"resumo":"<1 frase>"},"BANT":{"nota":<0-100>,"resumo":"<1 frase>"},"Rapport":{"nota":<0-100>,"resumo":"<1 frase>"}},"pontos_fortes":["<1>","<2>","<3>"],"ajustes_criticos":[{"problema":"<>","solucao":"<>"},{"problema":"<>","solucao":"<>"},{"problema":"<>","solucao":"<>"}],"reescrita_sugerida":"<abertura melhorada>","frase_diagnostico":"<frase estilo Sellexa>"}`;
+
+let currentTab='texto', audioFile=null, imagemFile=null, audioB64=null, imagemB64=null;
+
+function switchTab(t){
+  currentTab=t;
+  ['texto','audio','imagem'].forEach(x=>{
+    document.getElementById('panel-'+x).classList.toggle('active',x===t);
+    document.getElementById('tab-'+x).classList.toggle('active',x===t);
+  });
+}
+
+function handleFile(tipo,input){
+  const f=input.files[0]; if(!f) return;
+  const max=tipo==='audio'?25:10;
+  if(f.size>max*1024*1024){alert(`Máximo: ${max}MB`);input.value='';return;}
+  document.getElementById(tipo+'-name').textContent=f.name;
+  document.getElementById(tipo+'-size').textContent=(f.size/1024/1024).toFixed(2)+' MB';
+  document.getElementById('preview-'+tipo).classList.add('show');
+  document.getElementById('info-'+tipo).style.display='block';
+  const r=new FileReader();
+  r.onload=e=>{
+    const b64=e.target.result.split(',')[1];
+    if(tipo==='audio'){audioFile=f;audioB64=b64;}
+    else{imagemFile=f;imagemB64=b64;}
+  };
+  r.readAsDataURL(f);
+}
+
+function removeFile(tipo){
+  if(tipo==='audio'){audioFile=null;audioB64=null;document.getElementById('file-audio').value='';}
+  else{imagemFile=null;imagemB64=null;document.getElementById('file-imagem').value='';}
+  document.getElementById('preview-'+tipo).classList.remove('show');
+  document.getElementById('info-'+tipo).style.display='none';
+}
+
+function setStep(msg){document.getElementById('load-step').textContent=msg;}
+
+async function callProxy(body){
+  const r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  return r.json();
+}
+
+async function extractFromAudio(){
+  setStep('Transcrevendo áudio...');
+  const mime=audioFile.type||'audio/mpeg';
+  const data=await callProxy({
+    model:'claude-sonnet-4-6',max_tokens:1000,
+    messages:[{role:'user',content:[
+      {type:'text',text:'Transcreva este áudio de abordagem comercial na íntegra. Retorne apenas o texto transcrito.'},
+      {type:'document',source:{type:'base64',media_type:mime,data:audioB64}}
+    ]}]
+  });
+  return data.content?.[0]?.text||'';
+}
+
+async function extractFromImage(){
+  setStep('Lendo texto da imagem...');
+  const mime=imagemFile.type||'image/jpeg';
+  const data=await callProxy({
+    model:'claude-sonnet-4-6',max_tokens:1000,
+    messages:[{role:'user',content:[
+      {type:'text',text:'Extraia e transcreva todo o texto desta imagem de conversa/abordagem comercial (WhatsApp, e-mail, LinkedIn etc). Retorne apenas o texto extraído mantendo a ordem.'},
+      {type:'image',source:{type:'base64',media_type:mime,data:imagemB64}}
+    ]}]
+  });
+  return data.content?.[0]?.text||'';
+}
+
+async function analisar(){
+  let textoFinal='', textoExtraido='';
+  if(currentTab==='texto'){
+    textoFinal=document.getElementById('abordagem').value.trim();
+    if(!textoFinal||textoFinal.length<20){alert('Cole uma abordagem com pelo menos 20 caracteres.');return;}
+  } else if(currentTab==='audio'){
+    if(!audioB64){alert('Selecione um arquivo de áudio.');return;}
+  } else {
+    if(!imagemB64){alert('Selecione uma imagem.');return;}
+  }
+
+  document.getElementById('btn-analisar').disabled=true;
+  document.getElementById('form-area').style.display='none';
+  document.getElementById('loading').style.display='block';
+  document.getElementById('results').style.display='none';
+
+  try {
+    if(currentTab==='audio'){textoExtraido=await extractFromAudio();textoFinal=textoExtraido;}
+    else if(currentTab==='imagem'){textoExtraido=await extractFromImage();textoFinal=textoExtraido;}
+    if(!textoFinal||textoFinal.length<15) throw new Error('Não foi possível extrair conteúdo suficiente.');
+
+    setStep('Aplicando Método PRV, SPIN, AIDA, BANT e Rapport...');
+    const tipo=document.getElementById('tipo').value;
+    const seg=document.getElementById('segmento').value||'não informado';
+    const data=await callProxy({
+      model:'claude-sonnet-4-6',max_tokens:1200,system:SYSTEM,
+      messages:[{role:'user',content:`Tipo: ${tipo} | Segmento: ${seg}\n\nAbordagem:\n${textoFinal}`}]
+    });
+    const raw=data.content?.[0]?.text||'';
+    const match=raw.match(/\{[\s\S]*\}/);
+    if(!match) throw new Error('Resposta inválida da análise.');
+    renderResults(JSON.parse(match[0]),textoExtraido);
+  } catch(e){
+    document.getElementById('loading').style.display='none';
+    document.getElementById('form-area').style.display='block';
+    document.getElementById('btn-analisar').disabled=false;
+    alert('Erro: '+e.message);
+  }
+}
+
+function sc(n){
+  if(n>=75) return{c:'#22C78A'};
+  if(n>=50) return{c:'#F5A623'};
+  return{c:'#E05050'};
+}
+
+function renderResults(a,textoExtraido){
+  document.getElementById('loading').style.display='none';
+  const c=sc(a.nota_geral);
+  const pillarKeys=['PRV','SPIN','AIDA','BANT','Rapport'];
+  const pilarHTML=pillarKeys.map(k=>{
+    const p=a.pilares[k];const pc=sc(p.nota);
+    return `<div class="pillar-card"><div class="pillar-name">${k}</div><div class="pillar-bar"><div class="pillar-bar-fill" style="width:${p.nota}%;background:${pc.c}"></div></div><div class="pillar-score" style="color:${pc.c}">${p.nota}</div></div>`;
+  }).join('');
+  const transcricaoHTML=textoExtraido?`<div class="transcricao-block"><div class="transcricao-label">📄 Conteúdo extraído automaticamente</div><div class="transcricao-text">${textoExtraido.replace(/\n/g,'<br/>')}</div></div>`:'';
+  const fortesHTML=a.pontos_fortes.map(f=>`<li>${f}</li>`).join('');
+  const ajustesHTML=a.ajustes_criticos.map(aj=>`<li class="ajuste-item"><div class="ajuste-problema">${aj.problema}</div><div class="ajuste-solucao">${aj.solucao}</div></li>`).join('');
+
+  document.getElementById('results').innerHTML=`
+    <div class="score-hero">
+      <div class="score-ring" style="border-color:${c.c}">
+        <div class="num" style="color:${c.c}">${a.nota_geral}</div>
+        <div class="den" style="color:${c.c}">/100</div>
+      </div>
+      <div class="score-meta"><h2>${a.classificacao}</h2><p>${a.resumo_executivo}</p></div>
+    </div>
+    <div class="pillars-grid">${pilarHTML}</div>
+    <div class="diag-block"><div class="diag-icon">💡</div><div class="diag-text">"${a.frase_diagnostico}"</div></div>
+    ${transcricaoHTML}
+    <div class="two-col">
+      <div class="section-card"><h3 style="color:#22C78A">Pontos fortes</h3><ul class="strong-list">${fortesHTML}</ul></div>
+      <div class="section-card"><h3 style="color:#F5A623">Ajustes críticos</h3><ul class="ajuste-list">${ajustesHTML}</ul></div>
+    </div>
+    <div class="rewrite-block">
+      <div class="rewrite-label">✦ Reescrita sugerida pelo Método PRV</div>
+      <div class="rewrite-text">${a.reescrita_sugerida}</div>
+    </div>
+    <div class="cta-block">
+      <h3>Quer corrigir isso com método — não com achismo?</h3>
+      <p>A Formação Método Vendedor PRV transforma abordagens como a sua em processos replicáveis e previsíveis. 11 módulos, 24 encontros ao vivo.</p>
+      <a class="btn-cta" href="https://gruposellexa.com" target="_blank">Conhecer a Formação PRV →</a>
+    </div>
+    <button class="btn-novo" onclick="reset()">← Analisar outra abordagem</button>`;
+  document.getElementById('results').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function reset(){
+  document.getElementById('results').style.display='none';
+  document.getElementById('results').innerHTML='';
+  document.getElementById('form-area').style.display='block';
+  document.getElementById('abordagem').value='';
+  document.getElementById('btn-analisar').disabled=false;
+  removeFile('audio');removeFile('imagem');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+['audio','imagem'].forEach(tipo=>{
+  const area=document.getElementById('upload-'+tipo+'-area');
+  if(!area) return;
+  area.addEventListener('dragover',e=>{e.preventDefault();area.classList.add('dragover');});
+  area.addEventListener('dragleave',()=>area.classList.remove('dragover'));
+  area.addEventListener('drop',e=>{
+    e.preventDefault();area.classList.remove('dragover');
+    const f=e.dataTransfer.files[0];
+    if(f){const inp=document.getElementById('file-'+tipo);const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;handleFile(tipo,inp);}
+  });
+});
+</script>
+</body>
+</html>

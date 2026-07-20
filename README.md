@@ -1,0 +1,1 @@
+# sellexa-analisador
